@@ -909,6 +909,7 @@ body.pc .rb-mx th, body.pc .rb-mx td { padding: 7px 5px; }
   <!-- ★管理者マニュアル（2026-11-15 社長依頼）: 管理者にだけ出す。管理者のときは下のボタンは「配布スタッフ用マニュアル」になる -->
   <button type="button" class="btn-ghost hidden" id="popAdminManualBtn" style="margin-top:12px" onclick="App.openManual('admin')">📘 管理者マニュアル</button>
   <button type="button" class="btn-ghost" id="popManualBtn" style="margin-top:12px" onclick="App.openManual()">📖 マニュアルを見る</button>
+  <button type="button" class="btn-ghost hidden" id="popInstallBtn" style="margin-top:8px" onclick="App.openInstallGuide()">📲 アプリ化の手順</button>
   <button type="button" class="btn-ghost" style="margin-top:8px" onclick="App.logout()">ログアウト</button>
 </div>
 <main>
@@ -1126,6 +1127,7 @@ body.pc .rb-mx th, body.pc .rb-mx td { padding: 7px 5px; }
       <div id="accountBody"></div>
       <button type="button" class="btn-primary hidden" id="accAdminManualBtn" style="margin-top:12px" onclick="App.openManual('admin')">📘 管理者マニュアル</button>
       <button class="btn-primary" id="accManualBtn" style="margin-top:12px" onclick="App.openManual()">📖 マニュアルを見る</button>
+      <button type="button" class="btn-ghost hidden" id="accInstallBtn" style="margin-top:8px" onclick="App.openInstallGuide()">📲 アプリ化の手順</button>
       <button class="btn-ghost" style="margin-top:8px" onclick="App.logout()">ログアウト</button>
     </div>
     <!-- ★読み込み速度（計測用・2026-08-12）。
@@ -2049,12 +2051,22 @@ var App = (function() {
   //   管理者が発行したリンク（…/#k=xxxx）を押すと、中身を端末に覚えて、アドレス欄からは消す。
   //   「#」より後ろはサーバ（GitHub）へ送られないので、リンクの中身が記録に残らない。
   var LINK_KEY = 'hipos_link';
-  /** アドレスの #k=… を取り出す（無ければ ''）。取り出したらアドレス欄から消す */
+  /** アドレスの #k=… を取り出す（無ければ ''）。
+   *  ★2026-11-15 社長決定: アドレス欄からは消さない。LINE WORKS の「ブラウザで開く」で Chrome/Safari に移ったとき、
+   *    アドレスごと鍵が引き継がれて、そのまま入れるようにするため（消すと移った先がログイン画面になっていた）。 */
   function takeLinkFromUrl() {
     var h = String((typeof location !== 'undefined' && location && location.hash) || '');
     var m = h.match(/[#&]k=([A-Za-z0-9]{20,80})(?:&|$)/);
-    if (!m) return '';
-    return clearHashAnd(m[1]);
+    return m ? m[1] : '';
+  }
+  /** 専用リンクで入っている間は、アドレス欄に #k=… を付けておく（端末が覚えていた鍵で入ったときも付け直す） */
+  function keepLinkInUrl(tok) {
+    try {
+      if (!tok || typeof history === 'undefined' || !history.replaceState) return;
+      var want = '#k=' + tok;
+      if (String(location.hash || '') === want) return;
+      history.replaceState(null, '', String(location.pathname || '') + String(location.search || '') + want);
+    } catch (e) { /* 付けられなくても動作には影響しない */ }
   }
   function clearHashAnd(v) {
     try {
@@ -2069,6 +2081,7 @@ var App = (function() {
   function onLinkInvalid() {
     lsDel(LINK_KEY);
     state.linkToken = null;
+    clearHashAnd('');   // 使えなくなった鍵はアドレス欄からも消す（読み込み直しで同じ失敗を繰り返さない）
     if (!state.staff) return;   // 起動中なら showAuthError がログイン画面に理由を出す
     if (_linkInvalidShown) return;
     _linkInvalidShown = true;
@@ -2122,7 +2135,7 @@ var App = (function() {
   }
   function onSignIn(credential) {
     state.idToken = credential;
-    state.linkToken = null; lsDel(LINK_KEY);   // Googleで入ったら専用リンクは使わない
+    state.linkToken = null; lsDel(LINK_KEY); clearHashAnd('');   // Googleで入ったら専用リンクは使わない（アドレス欄の鍵も消す）
     try {
       var claims = JSON.parse(atob(credential.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
       state.tokenExp = (claims.exp || 0) * 1000;
@@ -2167,7 +2180,7 @@ var App = (function() {
       uiConfirm('この端末はいまGoogleでログインしています。\n専用リンクの人として入り直しますか？\n（管理者の方が試しに押した場合は「このまま」）',
         { ok: '専用リンクの人として入る', cancel: 'このまま' },
         function() { restoreSessionWith(fresh); },
-        function() { restoreSessionWith(''); });   // 使わない（アドレス欄からは消えている）
+        function() { clearHashAnd(''); restoreSessionWith(''); });   // 使わない（アドレス欄からも消す）
       return true;
     }
     return restoreSessionWith(fresh);
@@ -2178,6 +2191,7 @@ var App = (function() {
     var lk = fresh || lsGet(LINK_KEY);
     if (lk) {
       state.linkToken = lk;
+      keepLinkInUrl(lk);   // ★ブラウザを切り替えても入れるように、アドレス欄に鍵を置いておく
       _restoredSession = true;
       $('userBar').textContent = 'ログイン中';
       afterAuth();
@@ -2200,6 +2214,7 @@ var App = (function() {
         { ok: 'ログアウトする' }, function() { logout(true); });
     }
     lsDel('hipos_id_token'); lsDel('hipos_staff_token'); lsDel(LINK_KEY);
+    clearHashAnd('');   // ★アドレス欄の鍵も消す（残すと読み込み直しでまた入ってしまう）
     try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
     location.reload();
   }
@@ -2234,6 +2249,7 @@ var App = (function() {
   /** 手順を開く。★iframe の読み込みは押したときの1回だけ（アプリを重くしない）。アドレスは変えない（別ページへ移動しない） */
   function openInstallGuide() {
     var m = $('installModal'), f = $('installFrame'); if (!m || !f) return;
+    closeAcctPop();   // 右上のポップアップから開いたときは閉じる
     if (!f.getAttribute('src')) f.setAttribute('src', 'install.html');
     m.classList.remove('hidden');
     try {
@@ -2257,6 +2273,10 @@ var App = (function() {
       if (!_manualPopBound && window.addEventListener) { window.addEventListener('popstate', onManualPop); _manualPopBound = true; }
       if (!_manualHist && typeof history !== 'undefined' && history.pushState) { history.pushState({ hiposManual: 1 }, ''); _manualHist = true; }
     } catch (e) { /* 履歴を使えないブラウザでも［閉じる］で閉じられる */ }
+  }
+  /** 右上のアイコンの中の［📲 アプリ化の手順］（配布スタッフだけ・いつでも出す・2026-11-15） */
+  function applyInstallGuideBtns(on) {
+    ['popInstallBtn', 'accInstallBtn'].forEach(function(id) { var b = $(id); if (b) b.classList.toggle('hidden', !on); });
   }
   /** 右上のマニュアルのボタン: 管理者は［📖 配布スタッフ用マニュアル］［📘 管理者マニュアル］の2つ、アルバイトは1つ（2026-11-15） */
   function applyManualButtons(isAdmin) {
@@ -2534,7 +2554,10 @@ var App = (function() {
     $('userBar').textContent = state.staff.name + '（' + state.staff.staffId + '）' + permLabel;
     var aini = $('acctInitial'); if (aini) aini.textContent = (state.staff.name || '').trim().charAt(0) || '👤';
     var abtn = $('acctBtn'); if (abtn) abtn.classList.remove('hidden');   // 右上アカウントボタンを表示
-    showInstallBtn(false);   // 右上はアカウントボタンだけにする
+    // ★2026-11-15 社長決定: 配布スタッフには、ログイン後も右上に［アプリ化はこちら］を出す（アイコンから開いたとき以外）。
+    //   専用リンクだとログイン前の画面を通らないので、出さないと手順を見る入口が無かった。管理者には出さない。
+    showInstallBtn(!state.isAdmin);
+    applyInstallGuideBtns(!state.isAdmin);
     $('authCard').classList.add('hidden');
     $('bottomNav').classList.remove('hidden');
     // 権限3種でタブを出し分け:
