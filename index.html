@@ -795,7 +795,7 @@ details.help-box[open] > summary { margin-bottom: 6px; }
 .cyc-mini .cm-n { text-align: center; font-size: 12px; color: #188038; font-weight: 700; align-self: center; }
 .cyc-mini .cm-leg { font-size: 12px; color: var(--c-sub); margin-top: 4px; }
 
-/* #13 確認の窓（ブラウザ標準の「hptohyama.github.io の内容」をやめて、アプリの見た目に） */
+/* #13 確認の窓（ブラウザ標準の「〇〇.github.io の内容」をやめて、アプリの見た目に） */
 .uc-back { position: fixed; inset: 0; z-index: 90; background: rgba(32,33,36,.55); display: flex; align-items: center; justify-content: center; padding: 16px; }
 .uc-back.hidden { display: none; }
 .uc-box { background: #fff; border-radius: 16px; width: 100%; max-width: 440px; padding: 20px 18px 16px; box-shadow: 0 16px 40px rgba(0,0,0,.3); }
@@ -1720,7 +1720,7 @@ var CONFIG = {
   API_URL: 'https://script.google.com/macros/s/AKfycbx-oCBJqrmFtx4Cca8GaJ06e0FGEngjO_Lou3G0azkS2JQytjKlLa_uyz__lQ0KAHR_9g/exec',
   OAUTH_CLIENT_ID: '654669981739-o1iosejqh7dmvumciaannkn84rv6jdhs.apps.googleusercontent.com',
   // 専用リンクで配るアドレス（本番の画面・2026-11-07）
-  APP_URL: 'https://hptohyama.github.io/hipos-form/'
+  APP_URL: 'https://hipos-posting.github.io/hp-app/'
 };
 
 // カレンダーのリンク（?case=案件番号）から催事を自動選択するための値。
@@ -1977,7 +1977,7 @@ var App = (function() {
 
   // ─── #13 確認の窓（2026-11-08 社長選択）────────────────────────────────
   //   uiConfirm(文, { ok: 'ボタンの名前', cancel: 'やめる', danger: true }, OKのとき, やめたとき)
-  //   ・ブラウザ標準の confirm（「hptohyama.github.io の内容」・OK/キャンセル）をやめ、何が起きるかが分かる名前のボタンにする。
+  //   ・ブラウザ標準の confirm（「〇〇.github.io の内容」・OK/キャンセル）をやめ、何が起きるかが分かる名前のボタンにする。
   //   ・押したあとの処理は「OKのとき」の関数で続ける（confirm のように止まって待てないため）。
   //     呼び出し側は「同じ関数を、その質問に答えた印を付けてもう一度呼ぶ」形にしてある（確認より前は確かめるだけで何も変えない）。
   //   ・OKを押したら、最初に押したボタンに「保存中…」が出るようにする（_clickBtn を戻してから続ける）。
