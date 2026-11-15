@@ -5730,8 +5730,8 @@ var App = (function() {
     var households = z.households;
     // ★配布の担当がいるのに配布エリア（町）が空なら保存しない（2026-09-13・サーバと同じ決まり）。
     //   空のまま保存すると、その日の配布担当が報告できず、配布禁止物件も「禁止なし」と表示されてしまう。
-    //   送迎・現場指導以外は配布として数える（サーバの正規化と同じ）。
-    var hasDist = members.some(function(m) { return m.role !== '送迎' && m.role !== '現場指導'; });
+    //   送迎・現場指導・当日欠勤以外は配布として数える（サーバの正規化と同じ・当日欠勤は 2026-11-15）。
+    var hasDist = members.some(function(m) { return m.role !== '送迎' && m.role !== '現場指導' && m.role !== '当日欠勤'; });
     if (hasDist && towns.length === 0) {
       alert('配布エリア（町名）を1つ以上入力してください。\n\n' +
             '配布の担当がいる予定は、町が空のままでは保存できません' +
