@@ -5330,10 +5330,15 @@ var App = (function() {
     $('regList').style.display = '';
     $('regList').innerHTML = '<div class="empty">読み込み中…</div>';
     $('regListResult').innerHTML = '';
-    api({ action: 'listMyRegistrations' }).then(function(res) {
+    // ★速度（2026-11-15 社長依頼）: ふだんは「今月1日 か 7日前 の早いほう」以降だけを読む（過去を全部送ると重い）。
+    //   「過去の予定もすべて表示」や前の月のカレンダーを開いたときだけ、全部を読み直す（regNeedOlder）。
+    var from = state.regWantAll ? '' : regDefaultFrom();
+    api({ action: 'listMyRegistrations', from: from }).then(function(res) {
       state.regLoading = false;
       if (!res.ok) { $('regList').innerHTML = '<div class="empty">' + esc(res.message || res.code) + '</div>'; return; }
       state.registrations = res.registrations || [];
+      state.regFrom = res.from || '';   // サーバが絞らなかった（古いサーバ）なら '' ＝全部ある
+      state.regTotal = (res.total === undefined) ? null : Number(res.total) || 0;
       // ★編集中に一覧を取り直したときは、開いている編集フォームを「予定そのもの(srcEventId)」で
       //   追い直す。state.regEdit.i は配列の位置なので、他の管理者が登録/取消して並びが変わると
       //   別の予定のカードに編集フォームが付き、中身は元の予定のまま＝取り違えて保存する事故になる。
@@ -5363,7 +5368,20 @@ var App = (function() {
   }
   /** 既定の表示範囲＝今日以降＋過去7日（この日付以上の配布日だけ出す） */
   function regRecentFrom() { return isoAddDays(todayIso(), -7); }
-  function regToggleRecent() { regFilterInit(); state.regFilter.recent = !state.regFilter.recent; renderRegistrations(); }
+  /** 一覧をサーバから読むときの下限＝今日の7日前と今月1日の早いほう（一覧の既定とカレンダーの今月の両方が入る） */
+  function regDefaultFrom() { var a = regRecentFrom(), b = todayIso().slice(0, 7) + '-01'; return a < b ? a : b; }
+  /** いまの表示に、読んだ範囲より前の日が要るか（要るなら全部を読み直す） */
+  function regNeedOlder() {
+    if (!state.regFrom) return false;   // まだ読んでいない／全部読んである
+    var onCal = !state.regEdit && regView() === 'cal';   // 編集中は一覧（renderRegistrations と同じ決まり）
+    if (onCal) return ((state.regMonth || todayIso().slice(0, 7)) + '-01') < state.regFrom;
+    return !!(state.regFilter && state.regFilter.recent === false);
+  }
+  function regToggleRecent() {
+    regFilterInit(); state.regFilter.recent = !state.regFilter.recent;
+    if (state.regFilter.recent) state.regWantAll = false;   // 直近に戻したら、次からはまた軽い読み方で
+    renderRegistrations();
+  }
   function regBaseLabel(r) { return (r.base || r.area || '拠点未設定'); }
   function regBaseColor(b) { return BASE_COLORS[b] || BASE_COLORS[String(b).split('/')[0]] || '#868e96'; }
   function regNrm(s) { return String(s == null ? '' : s).normalize('NFKC').toLowerCase().replace(/\s+/g, ''); }
@@ -5385,17 +5403,21 @@ var App = (function() {
 
   function renderRegistrations() {
     regFilterInit();
+    // ★読んだ範囲より前が要る表示（過去もすべて・前の月のカレンダー）になったら、全部を読み直してから描く
+    if (regNeedOlder() && !state.regLoading) { state.regWantAll = true; loadRegistrations(); return; }
     var all = state.registrations || [];
+    // 範囲の中に予定が無くても、範囲の外にあれば絞り込みや切り替えは出す（「過去の予定もすべて表示」へ行けるように）
+    var hasAny = all.length > 0 || state.regTotal > 0;
     // ★編集している間は必ず一覧（編集欄は一覧のカードの中にある）
     var view = state.regEdit ? 'list' : regView();
-    var calOn = !!all.length && view === 'cal';
-    var bar = $('regFilterBar'); if (bar) bar.style.display = all.length ? '' : 'none';
-    $('regViewBar').style.display = all.length ? '' : 'none';
+    var calOn = hasAny && view === 'cal';
+    var bar = $('regFilterBar'); if (bar) bar.style.display = hasAny ? '' : 'none';
+    $('regViewBar').style.display = hasAny ? '' : 'none';
     $('regMonthBar').style.display = calOn ? '' : 'none';
     paintViewToggle('reg', view);
     $('regCal').style.display = calOn ? '' : 'none';
     $('regList').style.display = calOn ? 'none' : '';
-    if (!all.length) { $('regList').innerHTML = '<div class="empty">登録済みの予定はありません</div>'; return; }
+    if (!hasAny) { $('regList').innerHTML = '<div class="empty">登録済みの予定はありません</div>'; return; }
     var f = state.regFilter;
 
     // 検索＋表示範囲で絞った母集団（拠点ピルの件数はここから数える＝画面の数字が食い違わない）
@@ -5450,7 +5472,7 @@ var App = (function() {
       : '　<button type="button" class="reglink" onclick="App.regToggleRecent()">直近だけに戻す</button>';
     $('regCountLine').innerHTML = items.length + '件を表示' +
       (recentOn ? '（今日以降＋過去7日）' : '') +
-      (filtered ? '（全' + all.length + '件中）' : '') + rangeBtn + clearBtn;
+      (filtered ? '（全' + (state.regTotal != null ? state.regTotal : all.length) + '件中）' : '') + rangeBtn + clearBtn;
     if (!items.length) {
       $('regList').innerHTML = '<div class="empty">条件に合う予定がありません' + rangeBtn + clearBtn + '</div>';
       return;
