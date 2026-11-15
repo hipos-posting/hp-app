@@ -586,6 +586,8 @@
   .sa-day.pastsel { background: #e8f0fe; color: #7ba7f0; border-color: #cfe0fb; }   /* 過去の登録済み(変更不可) */
   .sa-day.today { border-color: var(--c-primary); }
   .sa-day.sel { background: var(--c-primary); border-color: var(--c-primary); color: #fff; }
+  .sa-mbar { justify-content: center; gap: 8px; margin: 4px 0 10px; }
+  .sa-mbar .oe-month { flex: 0 0 auto; min-width: 8.5em; text-align: center; }
   #bottomNav button { position: relative; }
   .navdot { position: absolute; top: 4px; right: calc(50% - 20px); width: 9px; height: 9px;
             border-radius: 50%; background: #c5221f; }
@@ -853,6 +855,11 @@ body.pc #overtimeView { display: grid; grid-template-columns: 1fr 1fr; gap: 16px
 body.pc #overtimeView > .card { margin-bottom: 0; }
 body.pc #overtimeView > #scAdminCard { grid-row: span 3; }
 /* 配布禁止管理: 案件ごとの回避状況をカードで横に並べる */
+/* ★2026-11-15 社長指摘: 出勤日の登録のカレンダーが大きすぎて見渡せない → 左にスタッフ・右に小さめのカレンダー */
+body.pc #saDaysPane { display: grid; grid-template-columns: minmax(280px, 380px) minmax(0, 640px); gap: 16px; align-items: start; }
+body.pc #saDaysPane > .card { margin-bottom: 0; }
+body.pc #saDaysPane .sa-day { aspect-ratio: auto; height: 46px; font-size: 15px; }
+body.pc #saDaysPane .sa-dow span { font-size: 12px; }
 body.pc #banCaseList { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 10px; }
 /* #19 承認待ちの修正報告が無いとき: 細い1行にたたみ、「スタッフを追加」を全幅で横一列に（左上の大きな空きを無くす） */
 body.pc #staffView.amend-empty #pendingAmendCard { grid-column: 1 / -1; display: flex; align-items: center; gap: 16px; padding: 10px 16px; }
@@ -1505,10 +1512,12 @@ body.pc .rb-mx th, body.pc .rb-mx td { padding: 7px 5px; }
     </div>
 
     <div class="card hidden" id="saCalCard">
-      <div class="sa-head">
-        <button type="button" class="sa-nav" id="saPrev" onclick="App.saMonth(-1)">‹</button>
-        <div class="sa-title" id="saMonthLabel">—</div>
-        <button type="button" class="sa-nav" id="saNext" onclick="App.saMonth(1)">›</button>
+      <!-- ★2026-11-15 社長指摘: 月の切替が左右の端で使いにくい → 月名の両隣にまとめ、［今月］を足した -->
+      <div class="oe-toolbar sa-mbar">
+        <button type="button" class="oe-nav" id="saPrev" onclick="App.saMonth(-1)" aria-label="前の月">◀</button>
+        <div class="oe-month sa-title" id="saMonthLabel">—</div>
+        <button type="button" class="oe-nav" id="saNext" onclick="App.saMonth(1)" aria-label="次の月">▶</button>
+        <button type="button" class="oe-today" id="saToday" onclick="App.saMonth(0)">今月</button>
       </div>
       <div class="sa-dow"><span>日</span><span>月</span><span>火</span><span>水</span><span>木</span><span>金</span><span>土</span></div>
       <div id="saGrid" class="sa-grid"></div>
@@ -1744,6 +1753,7 @@ try { PERF_ON = new URLSearchParams(location.search).get('perf') === '1'; } catc
 var App = (function() {
   var state = {
     idToken: null, tokenExp: 0,          // 社員（管理者）の Googleログイン
+    sessionToken: null,                  // ★Googleで入った人の8時間の入館証（2026-11-15）
     linkToken: null, loginMethod: '',   // アルバイト（配布員）の専用リンク（2026-11-07）
     deviceId: null, reportUuid: null, reportUuidKey: '',   // 送信IDと、その送信IDが属する案件×配布日（取り違え防止）
     email: '', cases: [], reportCase: null, areas: [], staffList: [], calendars: [], isAdmin: false, staff: null, registered: false,
@@ -2019,7 +2029,10 @@ var App = (function() {
 
   function api(payload) {
     payload.apiVersion = 1;
-    if (state.idToken) payload.idToken = state.idToken;              // 社員（Google）
+    if (state.idToken) {                                              // 社員（Google）
+      payload.idToken = state.idToken;
+      if (state.sessionToken) payload.sessionToken = state.sessionToken;   // ★8時間の入館証（サーバはこちらを先に見る）
+    }
     else if (state.linkToken) payload.staffLink = state.linkToken;   // ★アルバイト（専用リンク）
     var bodyText = JSON.stringify(payload);
     var canRetry = apiCanRetry(payload.action);
@@ -2040,6 +2053,7 @@ var App = (function() {
       //   配布禁止タブは古いチェック状況のまま固まり、報告は入力ごと消えていた。
       if (res && res.code === 'E_AUTH_LINK_INVALID') { onLinkInvalid(); }
       else if (res && res.code === 'E_AUTH_INVALID_TOKEN') { if (state.idToken) onTokenExpired(); else onLinkInvalid(); }
+      if (res && res.sessionToken && state.idToken) { state.sessionToken = res.sessionToken; lsSet(SESSION_KEY, res.sessionToken); }
       else if (res && res.code === 'E_AUTH_USE_LINK') { forgetGoogle(); }   // ★アルバイトが Googleで入ろうとした
       return res;
     });
@@ -2133,7 +2147,20 @@ var App = (function() {
       $('gsiPending').classList.remove('hidden');
     }
   }
-  function onSignIn(credential) {
+  /** ★8時間の入館証（2026-11-15 社長指示）。Googleの本人確認は1時間で切れるので、サーバが出す入館証で8時間続ける */
+  var SESSION_KEY = 'hipos_session';
+  /** 入館証の期限（ミリ秒）。読めなければ 0 */
+  function sessionExpOf(tok) {
+    try {
+      var b = String(tok || '').split('.')[1] || '';
+      b = b.replace(/-/g, '+').replace(/_/g, '/'); while (b.length % 4) b += '=';
+      var raw = atob(b);   // 中身は「メール|期限」（英数字だけ）
+      return Number(raw.substring(raw.lastIndexOf('|') + 1)) || 0;
+    } catch (e) { return 0; }
+  }
+  /** keepSession=true は「前回のログインを続ける」とき。Googleで新しく入ったときは入館証を作り直してもらう */
+  function onSignIn(credential, keepSession) {
+    if (keepSession !== true) { state.sessionToken = null; lsDel(SESSION_KEY); }
     state.idToken = credential;
     state.linkToken = null; lsDel(LINK_KEY); clearHashAnd('');   // Googleで入ったら専用リンクは使わない（アドレス欄の鍵も消す）
     try {
@@ -2149,6 +2176,7 @@ var App = (function() {
   function forgetGoogle() {
     state.idToken = null;
     lsDel('hipos_id_token');
+    state.sessionToken = null; lsDel(SESSION_KEY);
     try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
   }
 
@@ -2166,7 +2194,7 @@ var App = (function() {
       bar.className = 'expiredbar';
       document.body.appendChild(bar);
     }
-    bar.innerHTML = '⚠ ログインの有効期限が切れました（1時間）。<br>' +
+    bar.innerHTML = '⚠ ログインの有効期限が切れました。<br>' +
       '入力中の内容は保存しています。読み込み直すと復元されます。' +
       '<button type="button" onclick="location.reload()">読み込み直す</button>';
     bar.classList.remove('hidden');
@@ -2186,7 +2214,7 @@ var App = (function() {
     return restoreSessionWith(fresh);
   }
   function restoreSessionWith(fresh) {
-    if (fresh) { lsSet(LINK_KEY, fresh); lsDel('hipos_id_token'); }
+    if (fresh) { lsSet(LINK_KEY, fresh); lsDel('hipos_id_token'); lsDel(SESSION_KEY); }
     if (lsGet('hipos_staff_token')) lsDel('hipos_staff_token');   // 昔の個別トークンの残骸は掃除だけ
     var lk = fresh || lsGet(LINK_KEY);
     if (lk) {
@@ -2197,12 +2225,16 @@ var App = (function() {
       afterAuth();
       return true;
     }
-    // 社員: 前回の Googleログイン（1時間）が残っていれば続ける
+    // 社員: 前回の Googleログインが残っていれば続ける（★Googleの1時間が切れても、8時間の入館証が残っていれば続ける）
     var t = lsGet('hipos_id_token');
     if (t) {
       try {
         var claims = JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-        if (claims.exp * 1000 > Date.now() + 60000) { _restoredSession = true; onSignIn(t); return true; }
+        var sTok = lsGet(SESSION_KEY);
+        var sOk = !!sTok && sessionExpOf(sTok) > Date.now() + 60000;
+        if (!sOk && sTok) lsDel(SESSION_KEY);
+        if (sOk) state.sessionToken = sTok;
+        if (sOk || claims.exp * 1000 > Date.now() + 60000) { _restoredSession = true; onSignIn(t, true); return true; }
       } catch (e) { /* fallthrough */ }
     }
     return false;
@@ -2213,7 +2245,7 @@ var App = (function() {
       return uiConfirm('ログアウトすると、もう一度「専用リンク」を押すまで入れなくなります。\nログアウトしますか？',
         { ok: 'ログアウトする' }, function() { logout(true); });
     }
-    lsDel('hipos_id_token'); lsDel('hipos_staff_token'); lsDel(LINK_KEY);
+    lsDel('hipos_id_token'); lsDel('hipos_staff_token'); lsDel(LINK_KEY); lsDel(SESSION_KEY);
     clearHashAnd('');   // ★アドレス欄の鍵も消す（残すと読み込み直しでまた入ってしまう）
     try { if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect(); } catch (e) {}
     location.reload();
@@ -3277,9 +3309,17 @@ var App = (function() {
     decorateTownRowsHh();
   }
 
-  /** ★#4: 各町の入力欄の横に「🏠 300」（世帯数）を出す。世帯数が分からない町は出さない */
+  /** ★#4: 各町の入力欄の横に「🏠 300」（世帯数）を出す。世帯数が分からない町は出さない
+   *  ★2026-11-15 社長指示: 配布報告の町の横の世帯数は出さない（上の「🏠 世帯数（計）」の一覧は残す）。
+   *    呼び出し元はそのままにして、残っている表示を消すだけにした（戻すときは SHOW_TOWN_HH_CHIP を true に）。 */
+  var SHOW_TOWN_HH_CHIP = false;
   function decorateTownRowsHh() {
     var rowsBox = $('townRows'); if (!rowsBox) return;
+    if (!SHOW_TOWN_HH_CHIP) {
+      var olds = rowsBox.querySelectorAll('.hh-chip');
+      for (var oi = 0; oi < olds.length; oi++) olds[oi].remove();
+      return;
+    }
     var map = {};
     var L = state.hhList || { towns: [], hh: [] };
     (L.towns || []).forEach(function(t, i) {
@@ -8202,7 +8242,10 @@ var App = (function() {
       return uiConfirm('保存していない変更があります。破棄して月を移動しますか？',
         { ok: '破棄して移動する', danger: true }, function() { saMonth(delta, true); });
     }
-    var idx = f.viewY * 12 + f.viewM + delta;
+    var cur = f.viewY * 12 + f.viewM;
+    var tp0 = todayIso().split('-');
+    var idx = delta === 0 ? Number(tp0[0]) * 12 + (Number(tp0[1]) - 1) : cur + delta;   // 0＝今月
+    if (idx === cur) return;
     f.viewY = Math.floor(idx / 12); f.viewM = idx % 12;
     saLoadMonth();
   }
@@ -8216,6 +8259,7 @@ var App = (function() {
     var tp = f.today.split('-');
     var minIdx = Number(tp[0]) * 12 + (Number(tp[1]) - 1);
     $('saPrev').disabled = (y * 12 + m <= minIdx);   // 過去月には戻さない
+    if ($('saToday')) $('saToday').disabled = (y * 12 + m === minIdx);
     var startDow = new Date(y, m, 1).getDay();       // 0=日
     var daysInMonth = new Date(y, m + 1, 0).getDate();
     var monthPrefix = y + '-' + ('0' + (m + 1)).slice(-2) + '-';
@@ -8255,7 +8299,7 @@ var App = (function() {
     if (!f || state.submitting) return;
     if (!f.configured) { alert(f.name + ' さんの拠点が未設定です。配布員マスタの主エリアを設定してください。'); return; }
     if (f.loadFailed) {
-      alert('いまの状態を読み込めていません。\n月の «‹ ›» を押すか、担当者を選び直して読み込み直してから保存してください。\n' +
+      alert('いまの状態を読み込めていません。\n月の ◀ ▶ を押すか、担当者を選び直して読み込み直してから保存してください。\n' +
             '（古い状態のまま保存すると、直したはずの日が元に戻ってしまいます）');
       return;
     }
