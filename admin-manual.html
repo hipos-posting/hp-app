@@ -60,8 +60,13 @@
   dl.faq dt { font-weight: 700; margin-top: 12px; }
   dl.faq dt::before { content: "Q. "; color: var(--c-primary); }
   dl.faq dd { margin: 2px 0 0 0; padding-left: 1.6em; }
-  figure.shot { margin: 8px 0 14px; text-align: center; }
-  figure.shot img { display: block; width: 100%; max-width: 760px; height: auto; margin: 0 auto; border: 1px solid #dadce0;
+  /* ★写真の大きさをそろえる（2026-11-15 社長指摘: 大きすぎる写真と小さすぎる写真があった）。
+     どの写真も「元の画面の 72%」で出す（img の style の width）＝文字の大きさがそろう。
+     横に広い写真は本文の幅（820px）に収まらないので、写真だけ本文の外まで広げる（最大1180px）。
+     画面より広いときは画面の幅に縮む（スマホは全部画面いっぱい）。 */
+  figure.shot { margin: 8px 0 14px; text-align: center; position: relative; left: 50%; transform: translateX(-50%);
+                width: min(1180px, calc(100vw - 28px)); }
+  figure.shot img { display: block; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid #dadce0;
                     border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
   figure.shot figcaption { font-size: 13px; color: var(--c-sub); margin-top: 6px; }
   figure.shot figcaption b { color: #c5221f; }
@@ -119,10 +124,10 @@
       <div><b>🗂 シフト管理</b>出勤日の登録・シフトの日程</div>
       <div><b>⏰ 勤務調整</b>シフト変更の承認・残業（決められた管理者だけ）</div>
     </div>
-    <figure class="shot"><img src="admin/a1-menu.png" alt="管理者の画面。左にメニューが6つ並ぶ" width="1280" height="551" loading="lazy">
+    <figure class="shot"><img src="admin/a1-menu.png" alt="管理者の画面。左にメニューが6つ並ぶ" width="1280" height="551" style="width:1382px" loading="lazy">
       <figcaption><b>赤枠</b>が管理者のメニュー（PCでは左、スマホでは下に並びます）</figcaption></figure>
     <p class="note">右上の丸いアイコン → ログイン情報・ログアウト・このマニュアル（管理者用と配布スタッフ用の2つ）</p>
-    <figure class="shot"><img src="admin/a28-popup.png" alt="右上の丸いアイコンを押して開く窓。ログイン情報と、管理者マニュアル・配布スタッフ用マニュアルのボタン" width="460" height="470" loading="lazy">
+    <figure class="shot"><img src="admin/a28-popup.png" alt="右上の丸いアイコンを押して開く窓。ログイン情報と、管理者マニュアル・配布スタッフ用マニュアルのボタン" width="460" height="470" style="width:331px" loading="lazy">
       <figcaption><b>赤枠</b>：右上の丸いアイコン →［📘 管理者マニュアル］［📖 配布スタッフ用マニュアル］</figcaption></figure>
 
     <div class="ng"><span class="t">🔴 やってはいけないこと</span>
@@ -144,7 +149,7 @@
       <tr><th>アルバイト（配布員）</th><td>管理者が発行する<b>専用リンク</b>を押すだけで入れます（Googleアカウントもパスワードも要りません）。ID は P から始まります。</td></tr>
       <tr><th>社員（管理者）</th><td><b>Googleでログイン</b>します。ID は S から始まります。</td></tr>
     </table>
-    <figure class="shot"><img src="admin/b2-staff.png" alt="スタッフ管理の画面。上に承認待ちの修正報告、その下にスタッフを追加" width="1280" height="565" loading="lazy">
+    <figure class="shot"><img src="admin/b2-staff.png" alt="スタッフ管理の画面。上に承認待ちの修正報告、その下にスタッフを追加" width="1280" height="565" style="width:1132px" loading="lazy">
       <figcaption><b>赤枠</b>の「➕ スタッフを追加」で新しいスタッフを登録します</figcaption></figure>
 
     <h3>新しいスタッフを追加する</h3>
@@ -154,16 +159,16 @@
       <li>アルバイトなら <span class="ui">追加して専用リンクを発行</span>。出てきた［送る文面をコピー］を押して、<b>LINE WORKS で本人に送ります</b>。</li>
       <li>社員なら、その人の<b>Googleアカウントのメール</b>を入れて追加します。本人にそのGoogleアカウントでログインしてもらいます。</li>
     </ol>
-    <figure class="shot"><img src="admin/b3-add.png" alt="スタッフを追加に氏名・拠点・権限を入れたところ" width="1280" height="252" loading="lazy">
+    <figure class="shot"><img src="admin/b3-add.png" alt="スタッフを追加に氏名・拠点・権限を入れたところ" width="1280" height="252" style="width:1132px" loading="lazy">
       <figcaption>氏名・拠点・権限を選んで<b>［追加して専用リンクを発行］</b></figcaption></figure>
     <div class="why"><span class="t">💡 名簿のシートに手で行を足さないでください</span>
       手で足すと必要な項目が抜けて、その人だけ<b>報告の最後の送信で断られます</b>。追加は必ずこの画面から。</div>
 
     <h3>アルバイトに専用リンクを送る</h3>
     <p>すでに登録されているアルバイトには、一覧のその人の行の <span class="ui">🔗 リンクを発行</span> で出します。</p>
-    <figure class="shot"><img src="admin/b4-list.png" alt="登録済みスタッフの一覧。専用リンクのボタンが並ぶ" width="1280" height="600" loading="lazy">
+    <figure class="shot"><img src="admin/b4-list.png" alt="登録済みスタッフの一覧。専用リンクのボタンが並ぶ" width="1280" height="600" style="width:1132px" loading="lazy">
       <figcaption>リンクが無い人は<b>［🔗 リンクを発行］</b>、発行済みの人は<b>［発行し直す］［止める］</b></figcaption></figure>
-    <figure class="shot"><img src="admin/b5-link.png" alt="専用リンクを発行した直後の画面。リンクはぼかしてある" width="1280" height="440" loading="lazy">
+    <figure class="shot"><img src="admin/b5-link.png" alt="専用リンクを発行した直後の画面。リンクはぼかしてある" width="1280" height="440" style="width:1132px" loading="lazy">
       <figcaption><b>［送る文面をコピー］</b>を押して、LINE WORKS で本人に送ります（緑の枠の「このあとやること」も確かめてください）</figcaption></figure>
     <table>
       <tr><th>こんなとき</th><th>やること</th></tr>
@@ -222,13 +227,13 @@
       <li>⑦<b>配布禁止リスト</b>を［FunGuys案件］か［外部案件］から選びます（→ 配布禁止）。</li>
       <li><span class="ui">この内容でカレンダーに登録</span></li>
     </ol>
-    <figure class="shot"><img src="admin/c6-new-top.png" alt="予定登録の新規登録の上半分。拠点・案件番号・配布日・案件名" width="1280" height="595" loading="lazy">
+    <figure class="shot"><img src="admin/c6-new-top.png" alt="予定登録の新規登録の上半分。拠点・案件番号・配布日・案件名" width="1280" height="595" style="width:1132px" loading="lazy">
       <figcaption>①拠点 ②案件番号 ③配布日 ④案件名</figcaption></figure>
-    <figure class="shot"><img src="admin/c7a-area.png" alt="配布エリアの町名と世帯数を1行ずつ入れたところ" width="782" height="632" loading="lazy">
+    <figure class="shot"><img src="admin/c7a-area.png" alt="配布エリアの町名と世帯数を1行ずつ入れたところ" width="782" height="632" style="width:563px" loading="lazy">
       <figcaption><b>赤枠</b>：上に町名、下に世帯数を、同じ順で1行に1つずつ</figcaption></figure>
-    <figure class="shot"><img src="admin/c7b-count.png" alt="配布エリアと世帯数の行数がそろった表示と、選んだスタッフの役割" width="782" height="630" loading="lazy">
+    <figure class="shot"><img src="admin/c7b-count.png" alt="配布エリアと世帯数の行数がそろった表示と、選んだスタッフの役割" width="782" height="630" style="width:563px" loading="lazy">
       <figcaption><b>赤枠</b>：町名と世帯数の行数がそろうと緑のチェックが出ます（そろわないと登録できません）。その下で一人ずつ役割を選びます</figcaption></figure>
-    <figure class="shot"><img src="admin/c7c-ban.png" alt="配布禁止リストの選択と、この内容でカレンダーに登録ボタン" width="1280" height="415" loading="lazy">
+    <figure class="shot"><img src="admin/c7c-ban.png" alt="配布禁止リストの選択と、この内容でカレンダーに登録ボタン" width="1280" height="415" style="width:1132px" loading="lazy">
       <figcaption><b>赤枠</b>：FunGuys案件か外部案件を選んで →［この内容でカレンダーに登録］</figcaption></figure>
     <div class="why"><span class="t">💡 配布エリア（町名）は必ず入れてください</span>
       町が空だと、スタッフが報告できず、配布禁止の住所も「禁止なし」と出てしまいます（送迎・現場指導だけの予定は空で大丈夫です）。</div>
@@ -245,7 +250,7 @@
     <h3>「シフトに関係なく全員から選ぶ」</h3>
     <p>担当の候補には、ふだんは<b>その日にシフトが入っている人</b>だけが出ます。急に入ってもらうなど、シフトが無い人を担当にしたいときは「シフトに関係なく全員から選ぶ」を開くと、その拠点の全員から選べます。</p>
     <p class="note">配布しない管理者は出ません。「管理者（配布者）」の人は出ます。</p>
-    <figure class="shot"><img src="admin/c8-anystaff.png" alt="シフトに関係なく全員から選んでいるところ" width="767" height="440" loading="lazy">
+    <figure class="shot"><img src="admin/c8-anystaff.png" alt="シフトに関係なく全員から選んでいるところ" width="767" height="440" style="width:552px" loading="lazy">
       <figcaption>押すと拠点の全員が並びます。戻すときは<b>［シフトのある人だけに絞る］</b></figcaption></figure>
 
     <h3>登録済みの予定を直す・取り消す</h3>
@@ -255,9 +260,9 @@
       <li>中止・雨天順延のときは <span class="ui">取消</span>。順延は、取り消してから新しい日で登録し直します。</li>
     </ol>
     <p class="note">ふだんは今日以降と過去7日だけ出ます。上の検索や拠点のボタンで絞り込めます。古い予定は「過去の予定もすべて表示」から。</p>
-    <figure class="shot"><img src="admin/c9-list.png" alt="登録済みの予定の一覧。担当の名前と編集・取消のボタン" width="1280" height="306" loading="lazy">
+    <figure class="shot"><img src="admin/c9-list.png" alt="登録済みの予定の一覧。担当の名前と編集・取消のボタン" width="1280" height="306" style="width:1132px" loading="lazy">
       <figcaption>直すときは<b>［編集］</b>。当日欠勤にした人は<b>「✖ 名前（当日欠勤）」</b>と赤く出ます</figcaption></figure>
-    <figure class="shot"><img src="admin/c9b-detail.png" alt="カレンダーで予定を押したときの詳細。この予定を編集のボタン" width="694" height="629" loading="lazy">
+    <figure class="shot"><img src="admin/c9b-detail.png" alt="カレンダーで予定を押したときの詳細。この予定を編集のボタン" width="694" height="629" style="width:500px" loading="lazy">
       <figcaption>カレンダーの表示で予定を押すと、中身が大きく出ます。<b>［この予定を編集］</b>で直せます</figcaption></figure>
     <div class="ng"><span class="t">⚠ 報告が出ている日の予定は［取消］しないでください</span>
       報告は残りますが、その日の数字を本人が直せなくなります。担当を入れ替えたいだけなら［編集］で。</div>
@@ -269,9 +274,9 @@
       <li>休んだ人の役割で、赤い <span class="ui">当日欠勤</span> を押します。</li>
       <li><span class="ui">保存する</span></li>
     </ol>
-    <figure class="shot"><img src="admin/c10-roles.png" alt="編集画面の担当ごとの役割ボタン" width="1280" height="376" loading="lazy">
+    <figure class="shot"><img src="admin/c10-roles.png" alt="編集画面の担当ごとの役割ボタン" width="1280" height="376" style="width:1102px" loading="lazy">
       <figcaption><b>赤枠</b>：担当ごとに［配布］［送迎］［現場指導］［当日欠勤］を選べます</figcaption></figure>
-    <figure class="shot"><img src="admin/c11-absent.png" alt="当日欠勤を押して赤くなり、名前に✖が付いたところ" width="1280" height="284" loading="lazy">
+    <figure class="shot"><img src="admin/c11-absent.png" alt="当日欠勤を押して赤くなり、名前に✖が付いたところ" width="1280" height="284" style="width:1102px" loading="lazy">
       <figcaption><b>赤枠</b>：［当日欠勤］が赤くなり、名前に ✖ が付きます →［保存する］</figcaption></figure>
     <p>保存すると、次のようになります。</p>
     <ul>
@@ -290,11 +295,11 @@
       <li><span class="ui">＋ 予定</span> で拠点・日付・内容を入れて保存します。</li>
       <li>入れた予定を押すと、直す・消すができます。［カレンダー｜一覧］で見え方を切り替えられます。</li>
     </ol>
-    <figure class="shot"><img src="admin/c12-other.png" alt="その他の予定のカレンダー画面" width="1280" height="530" loading="lazy">
+    <figure class="shot"><img src="admin/c12-other.png" alt="その他の予定のカレンダー画面" width="1280" height="530" style="width:1143px" loading="lazy">
       <figcaption><b>赤枠</b>：右上の［＋ 予定］で追加。［カレンダー｜一覧］で見え方を切り替えられます</figcaption></figure>
-    <figure class="shot"><img src="admin/c13a-add.png" alt="その他の予定の追加。拠点・タイトル・説明（説明の住所などはぼかしています）" width="1280" height="316" loading="lazy">
+    <figure class="shot"><img src="admin/c13a-add.png" alt="その他の予定の追加。拠点・タイトル・説明（説明の住所などはぼかしています）" width="1280" height="316" style="width:1143px" loading="lazy">
       <figcaption><b>赤枠</b>：拠点とタイトル（必須）。説明は任意です（※この写真の住所などはぼかしています）</figcaption></figure>
-    <figure class="shot"><img src="admin/c13b-add.png" alt="その他の予定の追加。日付・色・カレンダーに追加ボタン" width="1280" height="446" loading="lazy">
+    <figure class="shot"><img src="admin/c13b-add.png" alt="その他の予定の追加。日付・色・カレンダーに追加ボタン" width="1280" height="446" style="width:1143px" loading="lazy">
       <figcaption><b>赤枠</b>：日付（1日だけなら終了日は空欄）→ 色は選ばなくてもOK →［カレンダーに追加］</figcaption></figure>
   </section>
 
@@ -313,13 +318,13 @@
       <tr><th>予</th><td>これからの予定</td></tr>
     </table>
     <p><b>マス</b>か<b>名前</b>を押すと、その日の中身（店舗・部数・配布時間・GPS）が出ます。上の［日×スタッフの表］と［スタッフ別］で、表と1人ずつの一覧を切り替えられます。</p>
-    <figure class="shot"><img src="admin/d14a-board.png" alt="報告管理の日×スタッフの表。拠点と月の選択、表の切り替え、記号の説明" width="1280" height="587" loading="lazy">
+    <figure class="shot"><img src="admin/d14a-board.png" alt="報告管理の日×スタッフの表。拠点と月の選択、表の切り替え、記号の説明" width="1280" height="587" style="width:1140px" loading="lazy">
       <figcaption><b>赤枠</b>：拠点を選ぶ →［日×スタッフの表］［スタッフ別］の切り替え → 記号の説明（未＝報告忘れ・欠＝当日欠勤 など）</figcaption></figure>
-    <figure class="shot"><img src="admin/d14b-board.png" alt="表の下の部分。部数・指導・欠と、日の合計" width="1280" height="549" loading="lazy">
+    <figure class="shot"><img src="admin/d14b-board.png" alt="表の下の部分。部数・指導・欠と、日の合計" width="1280" height="549" style="width:1140px" loading="lazy">
       <figcaption><b>赤枠</b>：緑の数字＝報告された部数・「指導」＝現場指導の日・「欠」＝当日欠勤。いちばん下は日ごとの合計</figcaption></figure>
-    <figure class="shot"><img src="admin/d15-detail.png" alt="マスを押すと右にその日の報告の中身が出たところ" width="1280" height="504" loading="lazy">
+    <figure class="shot"><img src="admin/d15-detail.png" alt="マスを押すと右にその日の報告の中身が出たところ" width="1280" height="504" style="width:1140px" loading="lazy">
       <figcaption><b>赤枠</b>：マスを押すと、右にその日の中身（店舗・部数・配布時間・部数毎時・GPSの枚数と［GPSを開く］）</figcaption></figure>
-    <figure class="shot"><img src="admin/d16-staff.png" alt="スタッフ別の表示。1人ずつ月の合計と日ごとの報告" width="1146" height="600" loading="lazy">
+    <figure class="shot"><img src="admin/d16-staff.png" alt="スタッフ別の表示。1人ずつ月の合計と日ごとの報告" width="1146" height="600" style="width:825px" loading="lazy">
       <figcaption><b>赤枠</b>：右上がその月の合計部数・日数・平均の部数毎時。［GPSを開く］でGPSの写真のフォルダが開きます</figcaption></figure>
 
     <h3>報告忘れの人への対応</h3>
@@ -336,7 +341,7 @@
       <li><span class="ui">👥 スタッフ管理</span> のいちばん上「✏️ 承認待ちの修正報告」を見ます。</li>
       <li>前と後の数字・理由を確かめて <span class="ui">承認</span> か <span class="ui">却下</span>。</li>
     </ol>
-    <figure class="shot"><img src="admin/d17-amend.png" alt="承認待ちの修正報告。合計部数の前と後、町ごとの部数、理由、承認と却下のボタン" width="784" height="554" loading="lazy">
+    <figure class="shot"><img src="admin/d17-amend.png" alt="承認待ちの修正報告。合計部数の前と後、町ごとの部数、理由、承認と却下のボタン" width="784" height="554" style="width:564px" loading="lazy">
       <figcaption><b>赤枠</b>：前→後の部数（合計と町ごと）→ 理由 → ［承認して反映］か［却下］</figcaption></figure>
     <p class="note">GPS画像は前の報告から自動で引き継がれます。押し間違えたときは、直後に出る「元に戻す」で戻せます（→ 困ったとき）。</p>
 
@@ -355,10 +360,10 @@
         <span class="note">［自動の日程を下敷きにする］を押すと、ふだんの決まりの日付が入るので、そこから直すと楽です。</span></li>
       <li><span class="ui">保存する</span>。日付がおかしいときは、赤い文で直し方が出ます。</li>
     </ol>
-    <figure class="shot"><img src="admin/e19-plan.png" alt="シフト管理のシフトの日程。拠点と月を選ぶと、いまの日程が出る" width="1280" height="558" loading="lazy">
+    <figure class="shot"><img src="admin/e19-plan.png" alt="シフト管理のシフトの日程。拠点と月を選ぶと、いまの日程が出る" width="1280" height="558" style="width:1140px" loading="lazy">
       <figcaption><b>赤枠</b>：［シフトの日程］→ 拠点を選ぶ → 月を選ぶ（◀ ▶）。下に「いまの日程」（提出期日と期間）が出ます</figcaption></figure>
     <p>日程の下の「📣 LINE WORKS に送る文」で、<b>シフトアナウンス</b>と<b>シフト回収催促</b>の文ができます。<span class="ui">📋 コピーして LINE WORKS に貼り付け</span> で送ってください。</p>
-    <figure class="shot"><img src="admin/e20-lw.png" alt="LINE WORKS に送る文。シフトアナウンスとシフト回収催促の切り替えと、コピーのボタン" width="1280" height="520" loading="lazy">
+    <figure class="shot"><img src="admin/e20-lw.png" alt="LINE WORKS に送る文。シフトアナウンスとシフト回収催促の切り替えと、コピーのボタン" width="1280" height="520" style="width:1140px" loading="lazy">
       <figcaption><b>赤枠</b>：［シフトアナウンス］か［シフト回収催促］を選ぶ →［📋 コピーして LINE WORKS に貼り付け］</figcaption></figure>
     <p class="note">日程を入れ替えたら、スタッフには「シフトの画面を一度読み込み直してください」と伝えてください。</p>
 
@@ -371,7 +376,7 @@
       <li>スタッフを選び、月のカレンダーで出勤日を<b>タップ</b>します（もう一度タップで取消）。勤務時間は 10:00〜19:00 固定です。月は ◀ ▶ と <span class="ui">今月</span> で切り替えます。</li>
       <li><span class="ui">この月の内容で保存</span>（月ごとに保存します）。カレンダーにも自動で入ります。</li>
     </ol>
-    <figure class="shot"><img src="admin/e21-days.png" alt="出勤日の登録。左でスタッフを選び、右の月のカレンダーで出勤日をタップ" width="1280" height="617" loading="lazy">
+    <figure class="shot"><img src="admin/e21-days.png" alt="出勤日の登録。左でスタッフを選び、右の月のカレンダーで出勤日をタップ" width="1280" height="617" style="width:1078px" loading="lazy">
       <figcaption><b>赤枠</b>：スタッフを選ぶ → 月を選ぶ（◀ ▶・今月）→ 出勤日をタップ（青＝出勤）→［この月の内容で保存］</figcaption></figure>
 
     <h3>シフト変更の申請を承認する</h3>
@@ -381,7 +386,7 @@
       <li>担当者・日付・変更内容（出勤／欠勤）・理由を確かめて <span class="ui">承認して反映</span> か <span class="ui">却下</span>。</li>
       <li>承認すると、その場でカレンダーとシフトが変わります。却下の理由は本人の画面に出ます。</li>
     </ol>
-    <figure class="shot"><img src="admin/e22-change.png" alt="シフト変更の申請。担当者・日付・出勤から欠勤・理由と、承認と却下のボタン" width="794" height="412" loading="lazy">
+    <figure class="shot"><img src="admin/e22-change.png" alt="シフト変更の申請。担当者・日付・出勤から欠勤・理由と、承認と却下のボタン" width="794" height="412" style="width:572px" loading="lazy">
       <figcaption><b>赤枠</b>：担当者・日付・変更内容（出勤→欠勤）・理由 →［承認して反映］か［却下］</figcaption></figure>
     <ul class="note">
       <li>申請できるのは<b>前日まで</b>です。当日の変更は LINE WORKS で連絡を受けて、予定の［編集］（当日欠勤など）で対応します。</li>
@@ -395,7 +400,7 @@
       <li>スタッフを選ぶと、日ごとの一覧が出ます。変えたい日の開始・終了を入れて <span class="ui">この時間で残業を付ける</span> を押します。</li>
       <li>カレンダーのその日の予定の時刻が変わり、名前の右に「•」が付きます。</li>
     </ol>
-    <figure class="shot"><img src="admin/e23-overtime.png" alt="残業。スタッフを選ぶと日ごとの一覧が出て、開始・終了と理由を入れて残業を付ける" width="786" height="634" loading="lazy">
+    <figure class="shot"><img src="admin/e23-overtime.png" alt="残業。スタッフを選ぶと日ごとの一覧が出て、開始・終了と理由を入れて残業を付ける" width="786" height="634" style="width:566px" loading="lazy">
       <figcaption><b>赤枠</b>：期間（直近7日・14日・31日）→ 開始・終了と理由 →［この時間で残業を付ける］。出勤日として登録されていない日は、黄色の案内が出て付けられません</figcaption></figure>
     <ul class="note">
       <li>その日が<b>出勤日として登録されている</b>必要があります（シフト管理で登録）。</li>
@@ -414,9 +419,9 @@
       <li><b>📊 案件ごとの回避状況</b>：過去14日ぶん。前の日のチェック漏れはここで気づけます。</li>
       <li><b>📋 本日の配布禁止リスト</b>：元のシートとマイマップを開けます。</li>
     </ul>
-    <figure class="shot"><img src="admin/f24-ban.png" alt="配布禁止管理の上の部分。未チェックの警告、案件ごとの回避の数、回避したらタップのボタン" width="1280" height="643" loading="lazy">
+    <figure class="shot"><img src="admin/f24-ban.png" alt="配布禁止管理の上の部分。未チェックの警告、案件ごとの回避の数、回避したらタップのボタン" width="1280" height="643" style="width:1146px" loading="lazy">
       <figcaption><b>赤枠</b>：未チェックが残っていると赤い警告 → 案件ごとの「回避 0 / 4件」→ 管理者が［回避したらタップ］を押しても全員に反映されます（住所と担当者名はぼかしています）</figcaption></figure>
-    <figure class="shot"><img src="admin/f25-ban2.png" alt="案件ごとの回避状況と、本日の配布禁止リストのシートとマイマップ" width="1280" height="296" loading="lazy">
+    <figure class="shot"><img src="admin/f25-ban2.png" alt="案件ごとの回避状況と、本日の配布禁止リストのシートとマイマップ" width="1280" height="296" style="width:1146px" loading="lazy">
       <figcaption><b>赤枠</b>：案件ごとの回避状況（過去14日・未チェックの件数）→ 本日の配布禁止リストの［シート］［マイマップ］</figcaption></figure>
 
     <h3>FunGuys案件と外部案件</h3>
@@ -443,7 +448,7 @@
 
     <h3>「元に戻す」（承認・却下の押し間違い）</h3>
     <p>承認・却下を押した直後だけ、画面の下に黒い帯で <span class="ui">元に戻す</span> が<b>数秒</b>出ます。押し間違えたら、すぐに押してください。</p>
-    <figure class="shot"><img src="admin/g27-undo.png" alt="承認した直後に画面の下に出る黒い帯と、元に戻すのボタン" width="738" height="96" loading="lazy">
+    <figure class="shot"><img src="admin/g27-undo.png" alt="承認した直後に画面の下に出る黒い帯と、元に戻すのボタン" width="738" height="96" style="width:531px" loading="lazy">
       <figcaption><b>赤枠</b>：承認・却下の直後に出る黒い帯の［元に戻す］。数秒で消えます</figcaption></figure>
     <table>
       <tr><th>どこで</th><th>承認を戻す</th><th>却下を戻す</th></tr>
