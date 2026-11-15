@@ -468,6 +468,8 @@
   #undoToast .ut-btn { background: #8ab4f8; color: #202124; border: none; border-radius: 8px;
                        padding: 9px 14px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
   #undoToast .ut-btn[disabled] { opacity: .5; cursor: default; }
+  /* ★2026-11-15 PCで文が1文字ずつ縦に並んだ（画面全体の button{width:100%} がボタンを横いっぱいに広げ、文の幅を潰していた） */
+  #undoToast .ut-btn, #undoToast .ut-x { width: auto; flex: 0 0 auto; }
   /* ★iPhone（Face ID世代）で、下に固定したものが画面下端のホームバーに重ならないように（2026-09-13）。
      viewport-fit=cover なので safe-area のぶんを足す。上書きは元の定義より後ろに置く（同じ強さなら後ろが勝つ）。
      env() を読めない古いブラウザは、この行ごと無視して元の値のまま動く。
