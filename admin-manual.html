@@ -130,6 +130,21 @@
     <figure class="shot"><img src="admin/a28-popup.png" alt="右上の丸いアイコンを押して開く窓。ログイン情報と、管理者マニュアル・配布スタッフ用マニュアルのボタン" width="460" height="470" style="width:331px" loading="lazy">
       <figcaption><b>赤枠</b>：右上の丸いアイコン →［📘 管理者マニュアル］［📖 配布スタッフ用マニュアル］</figcaption></figure>
 
+    <!-- ★2026-11-19 社長依頼: シートが2つあってややこしい → 使い分けとURLを書く -->
+    <h3>2つのスプレッドシート</h3>
+    <p>管理者が使うスプレッドシートは2つあります。<b>ふだん開くのは①だけ</b>です。</p>
+    <table>
+      <tr><th>① 運用データ管理シート<br><span class="note">毎日見る</span></th><td>
+        報告状況・スタッフ別報告・当日欠勤・シフト提出状況・回避チェック のタブがあります（自動で作り直されるので、見るだけ）。<br>
+        上のメニュー <span class="ui">🅷 Hiポス管理</span> もここにあります。<br>
+        🔗 <a href="https://docs.google.com/spreadsheets/d/1CCtRVPcf8ewLPXrA-rknXqjMoT5mZVewylhF_LTdFlI/edit" target="_blank" rel="noopener">運用データ管理シートを開く</a></td></tr>
+      <tr><th>② 報告DB<br><span class="note">名簿・設定</span></th><td>
+        <b>配布員マスタ</b>（スタッフの名簿）と <b>__設定__</b> があります。週払いの★・運転可・退職はここで直します。<br>
+        ①のメニュー <span class="ui">🅷 Hiポス管理</span> → <span class="ui">👥 配布員マスタを開く（報告DB）</span> からも開けます。<br>
+        🔗 <a href="https://docs.google.com/spreadsheets/d/1-xFN7uX2jrdB8sNYd6t_rL96NAqPSbjTBxtjfhkdcgA/edit" target="_blank" rel="noopener">報告DBを開く</a></td></tr>
+    </table>
+    <p class="note">②の「報告」「GPS画像索引」のタブはアプリが書き込む記録です。手で直さないでください。</p>
+
     <div class="ng"><span class="t">🔴 やってはいけないこと</span>
       <ul>
         <li><b>Googleカレンダーの予定を直接いじらない</b>。アプリが作った配布予定・シフト予定を、カレンダーで直す・消す・動かすと、アプリの記録とずれます（ずれても気づけません）。変更は必ずアプリの［編集］［取消］・シフト管理・勤務調整から。<br>
@@ -197,6 +212,7 @@
     </ol>
 
     <h3>週払いの★・運転可</h3>
+    <p class="note">配布員マスタは<b>②報告DB</b>にあります（①運用データ管理シートのメニュー <span class="ui">👥 配布員マスタを開く（報告DB）</span> からも開けます）。</p>
     <ul>
       <li>配布員マスタの <b>N列「週払い」に ★</b> を入れると、シフト予定のカレンダーで名前の前に★が付きます（空欄＝月払い）。</li>
       <li>配布員マスタの <b>O列「運転可」</b> に入れると、シフト予定の色が運転できる人の色に変わります。</li>
