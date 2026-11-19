@@ -843,10 +843,20 @@ body.pc .acct-pop-title { font-size: 14px; color: var(--c-sub); font-weight: 600
 body.pc #staffView { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
 body.pc #staffView > .card { margin-bottom: 0; }
 body.pc #staffView > .card:last-child { grid-column: 1 / -1; }
-body.pc #stRoster .st-row { display: grid !important; grid-template-columns: minmax(200px, 1.1fr) minmax(180px, 1fr) minmax(280px, 1.1fr) minmax(320px, 1.5fr);
-  align-items: center; gap: 4px 18px; padding: 10px 14px; margin-bottom: 6px; cursor: default; }
-body.pc #stRoster .st-row > * { margin-top: 0 !important; }
+/* ★2026-11-19 社長指摘: 画面が狭い・拡大しているとボタンや文字がはみ出していた
+     （4列それぞれに「これより狭くしない」幅があり、合計約1060px より狭いと行ごと右へはみ出した）。
+     → 狭いときは1人を2段（名前｜ID・メール／権限｜専用リンク）。広い画面（1500px以上）だけ4列で1行。
+       どの列も縮められるようにして（minmax(0, …)）、文字は枠の中で折り返す。 */
+body.pc #stRoster .st-row { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  align-items: center; gap: 8px 18px; padding: 10px 14px; margin-bottom: 6px; cursor: default; }
+@media (min-width: 1500px) {
+  body.pc #stRoster .st-row { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.1fr) minmax(0, 1.5fr); }
+}
+body.pc #stRoster .st-row > * { margin-top: 0 !important; min-width: 0; }
+body.pc #stRoster .st-row .meta { overflow-wrap: anywhere; }
+body.pc #stRoster .st-row .footer-note { white-space: normal; overflow-wrap: anywhere; margin-top: 0; }   /* 隣のボタンと高さをそろえる */
 body.pc #stRoster .st-row > .st-issued { grid-column: 1 / -1; margin-top: 6px !important; }
+body.pc #stRoster .st-row .st-url { box-sizing: border-box; max-width: 100%; }
 body.pc #stRoster .st-row select { max-width: 200px !important; }
 /* 予定登録（新規）: ①〜⑦を2列に。説明と登録ボタンは全幅 */
 body.pc #regNewPane { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
